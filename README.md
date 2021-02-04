@@ -58,7 +58,7 @@ for [lswl_plus.py]:
 
 #### Examples
 
-The following commands run different codes in this repository:
+The following commands are examples demonstrating how each code in this repository can be executed:
 ```
 $ python lswl_offline.py -n karate_edge_list.txt -q query_nodes.txt -s 1
 $ python lswl_online.py -n karate_edge_list.txt -q query_nodes.txt -s 2
@@ -66,6 +66,12 @@ $ python lswl_plus.py -n karate_edge_list.txt -i y
 $ python mod_r.py -n karate_edge_list.txt -q query_nodes.txt
 $ python mod_m.py -n karate_edge_list.txt -q query_nodes.txt
 ```
+
+Feel free to have a look at different parameters of each code via:
+```
+$ python [code_name.py] -h
+```
+
 
 
 
