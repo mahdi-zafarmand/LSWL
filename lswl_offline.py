@@ -7,7 +7,6 @@ import argparse
 def load_graph(path, weighted=False, delimiter='\t', self_loop=False):
 	graph = nx.Graph()
 	if not os.path.isfile(path):
-		print('+++')
 		print("Error: file " + path + " not found!")
 		exit(-1)
 
