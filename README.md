@@ -8,26 +8,27 @@ Community detection methods aim to find nodes connected to each other more than 
 This repository provides Networkx implementation for LSWL and LSWL+ described in
 > Local Community Discovery in Complex Networks: Relying on the Strength of Links, submitted for KDD 2021.
 
-The original codes are *lswl_offline.py*, which finds the communities of nodes in a given network, *lswl_online.py*, which does the same thing for cases when the intended network is too large and extensive memory consumption needs to be avoided. The last is *lswl_plus.py*, which uses our novel local discovery framework to detect the entire community structure of a given network by iteratively applying the *LSWL* approach to the unexplored parts of the network. The *LSWL+* is capable of finding a partition with overlapping communities or without them, based on user preferences. This method can also find outliers (peripheral nodes of the graph that are marginally connected to communities) and hubs (nodes that bridge the communities). Modularity R and Modularity M are two methods originally presented in [[1]] (#1) and [[2]] (#2), which we implemented for the evaluation purposes.
+The original codes are lswl_offline.py, which finds the communities of nodes in a given network, lswl_online.py, which does the same thing when the intended network is too large extensive memory consumption needs to be avoided. The last is lswl_plus.py, which uses our novel local discovery framework to detect the entire community structure of a given network by iteratively applying the LSWL approach to the unexplored parts of the network. The LSWL+ is capable of finding a partition with overlapping communities or without them, based on user preferences. This method can also find outliers (peripheral nodes of the graph that are marginally connected to communities) and hubs (nodes that bridge the communities). Modularity R and Modularity M are two methods initially presented in the following references, which we implemented for evaluation purposes.
+
 
 #### References
-@article{Clauset2005,
-	title = {Finding local community structure in networks},
-	volume = {72},
-	number = {2},
-	journal = {Physical Review E},
-	author = {Clauset, Aaron},
-	year = {2005},
-	pages = {026132},
-}
+	@article{Clauset2005,
+	 title = {Finding local community structure in networks},
+	 volume = {72},
+	 number = {2},
+	 journal = {Physical Review E},
+	 author = {Clauset, Aaron},
+	 year = {2005},
+	 pages = {026132},
+	}
 
-@inproceedings{Luo2006,
-  year = {2006},
-  author = {Feng Luo and James Wang and Eric Promislow},
-  title = {Exploring Local Community Structures in Large Networks},
-  booktitle = {2006 {IEEE}/{WIC}/{ACM} International Conference on Web Intelligence ({WI}{\textquotesingle}06)},
-  pages = {233--239},
-}
+	@inproceedings{Luo2006,
+	  year = {2006},
+	  author = {Feng Luo and James Wang and Eric Promislow},
+	  title = {Exploring Local Community Structures in Large Networks},
+	  booktitle = {2006 {IEEE}/{WIC}/{ACM} International Conference on Web Intelligence ({WI}{\textquotesingle}06)},
+	  pages = {233--239},
+	}
 
 ### Requirements
 The codebase is implemented in Python 3.8.5 package versions used for development are just below.
@@ -38,7 +39,7 @@ argparse          1.1
 
 ### Datasets
 
-This repository also contains the synthetic networks, we generated via the *LFR benchmark*, for the evaluation section of our paper. Any code in this repository takes the **edge list** of a graph, in which any line indicates an edge between two nodes separated by *\t*. In addition to the network file, a file containing all **query nodes** should exists. In this file, each line contains a node that is used as the start node to discover its community. 
+This repository also contains the synthetic networks we generated via the *LFR benchmark* for our paper's evaluation section. Any code in this repository takes the **edge list** of a graph, in which any line indicates an edge between two nodes separated by *\t*. In addition to the network file, a file containing all **query nodes** should exist. In this file, each line has a node used as the start node to discover its community. 
 
 #### Input and output options
 ```
