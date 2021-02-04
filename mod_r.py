@@ -52,7 +52,6 @@ def create_argument_parser_main():
 
 class ModularityRCommunityDiscovery():
 	minimum_improvement = 0.000001
-	timer_timeout = 2.0
 
 	def __init__(self, graph):
 		self.graph = graph
