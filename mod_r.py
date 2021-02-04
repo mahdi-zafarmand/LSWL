@@ -1,6 +1,7 @@
 import networkx as nx
 import os.path
 import time
+import argparse
 from random import random
 
 
@@ -28,13 +29,34 @@ def load_graph(path, weighted=False, delimiter='\t', self_loop=False):
 	return graph
 
 
+def read_query_nodes(path):
+	query_nodes = []
+	if not os.path.isfile(path):
+		print("Error: file " + path + " not found!")
+		exit(-1)
+
+	with open(path, 'r') as file:
+		lines = file.readlines()
+		for i in range(len(lines)):
+			query_nodes.append(int(lines[i]))
+	return query_nodes
+
+
+def create_argument_parser_main():
+	parser = argparse.ArgumentParser()
+	parser.add_argument("-s", "--strength_type", help="1 for weights in [-1,+1] and 2 for weights in [0,1], default is 2.")
+	parser.add_argument("-n", "--network", help="network file address")
+	parser.add_argument("-q", "--query_nodes", help="query nodes file address")
+	parser.add_argument("-t", "--timeout", help="maximum time for LSWL to recover the community in seconds, default is 2 seconds.")
+	parser.add_argument("-o", "--output", help="path of the output file, default is './community.dat'.")
+	return parser.parse_args()
+
+
 class ModularityRCommunityDiscovery():
-	# the class to search for the community of a given node in a social network using Local SIWO algorithm.
-	minimum_improvement = 0.000001     # if an improvement is less than minimum, the process stops considering stability
+	minimum_improvement = 0.000001
 	timer_timeout = 2.0
 
 	def __init__(self, graph):
-		# initializes the object
 		self.graph = graph
 		self.starting_node = None
 		self.community = []
@@ -43,19 +65,16 @@ class ModularityRCommunityDiscovery():
 		self.remove_self_loops()
 
 	def reset(self):
-		# resets the object to prepare it for another use
 		self.community.clear()
 		self.boundary.clear()
 		self.shell.clear()
 
 	def remove_self_loops(self):
-		# algorithms tend to work better if there is no self-loop in the given graph, so we call this method at first.
 		for node in self.graph.nodes():
 			if self.graph.has_edge(node, node):
 				self.graph.remove_edge(node, node)
 
 	def set_start_node(self, start_node):
-		# check the validity of the given start_node, then puts it in the community and initialize the shell set.
 		if start_node in self.graph.nodes():
 			self.starting_node = start_node
 			self.community.append(start_node)
@@ -72,13 +91,11 @@ class ModularityRCommunityDiscovery():
 		self.update_shell_when_node_joins(node)
 
 	def update_shell_when_node_joins(self, new_node):
-		# after a new_node expands the community, the shell set should be updated.
 		self.shell.update(self.graph.neighbors(new_node))
 		for node in self.community:
 			self.shell.discard(node)
 
 	def update_boundary_when_node_joins(self, new_node):
-		# after a new_node expands the community, boundary set should be updated by adding and removing some nodes.
 		should_be_boundary = False
 		for neighbor in self.graph.neighbors(new_node):
 			if (neighbor in self.community) is False:
@@ -96,8 +113,7 @@ class ModularityRCommunityDiscovery():
 				best_improvement = improvement
 		return best_candidate
 
-	def community_search(self, start_node):   # no use for 'with_amend' in this algorithm.
-		# THE MAIN FUNCTION OF THE CLASS, finds all other nodes that belong to the same community as the start_node does.
+	def community_search(self, start_node):
 		self.set_start_node(start_node)
 		modularity_r = 0.0
 		T = self.graph.degree[start_node]
@@ -135,7 +151,6 @@ class ModularityRCommunityDiscovery():
 		return float(x - R * y - z * (1 - R)) / float(T - z + y), -z + y
 
 	def should_leave_boundary(self, possibly_leaving_node, neighbor_node):
-		# to find if 'possibly_leaving_node' should leave 'self.boundary' because of the agglomeration of 'neighbor_node'.
 		neighbors = set(self.graph.neighbors(possibly_leaving_node))
 		neighbors.discard(neighbor_node)
 		for neighbor in neighbors:
@@ -143,31 +158,21 @@ class ModularityRCommunityDiscovery():
 				return False
 		return True
 
-def read_query_nodes(filename):
-	query_nodes = []
-	with open(filename, 'r') as file:
-		lines = file.readlines()
-		for i in range(len(lines)):
-			query_nodes.append(int(lines[i].split()[0]))
-	return query_nodes
-
 
 if __name__ == "__main__":
 	start_time = time.time()
 	
-	network_file_address = 'karate_edge_list.txt'
-	query_nodes_filename = 'query_nodes.txt'
-
-	graph = load_graph(network_file_address)
-	query_nodes = read_query_nodes(query_nodes_filename)
+	args = create_argument_parser_main()
+	graph = load_graph(args.network)
+	query_nodes = read_query_nodes(args.query_nodes)
+	timeout = float(args.timeout) if args.timeout != None and args.timeout.isnumeric() == True else 2.0
+	output = args.output if args.output != None else 'community.dat'
 
 	community_searcher = ModularityRCommunityDiscovery(graph)
-	with open('mod_r_results.txt', 'w') as file:
+	with open(output, 'w') as file:
 		for e, node_number in enumerate(query_nodes):
-			print(str(e) + ' : ' + str(node_number) + ' > (', end='')
 			community = community_searcher.community_search(start_node=node_number)
-			print(str(len(community)) + ' nodes)')
+			print(str(e) + ' : ' + str(node_number) + ' > (' + str(len(community)) + ' nodes)')
 			file.write(str(node_number) + ' : ' + str(community) + ' (' + str(len(community)) + ')\n')
 			community_searcher.reset()
-
 	print('elapsed time =', time.time() - start_time)
