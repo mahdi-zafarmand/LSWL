@@ -11,7 +11,6 @@ This repository provides Networkx implementation for LSWL and LSWL+ described in
 The original codes are *lswl_offline.py*, which finds the communities of nodes in a given network, *lswl_online.py*, which does the same thing for cases when the intended network is too large and extensive memory consumption needs to be avoided. The last is *lswl_plus.py*, which uses our novel local discovery framework to detect the entire community structure of a given network by iteratively applying the *LSWL* approach to the unexplored parts of the network. The *LSWL+* is capable of finding a partition with overlapping communities or without them, based on user preferences. This method can also find outliers (peripheral nodes of the graph that are marginally connected to communities) and hubs (nodes that bridge the communities). Modularity R and Modularity M are two methods originally presented in [[1]] (#1) and [[2]] (#2), which we implemented for the evaluation purposes.
 
 #### References
-<a id="1">[1]</a>
 @article{Clauset2005,
 	title = {Finding local community structure in networks},
 	volume = {72},
@@ -21,7 +20,7 @@ The original codes are *lswl_offline.py*, which finds the communities of nodes i
 	year = {2005},
 	pages = {026132},
 }
-<a id="2">[2]</a>
+
 @inproceedings{Luo2006,
   year = {2006},
   author = {Feng Luo and James Wang and Eric Promislow},
@@ -43,17 +42,17 @@ This repository also contains the synthetic networks, we generated via the *LFR 
 
 #### Input and output options
 ```
---strength_type   STR   '1': strengths between [-1,+1] and '2': strengths between [0,1].   Default is '2'.
---network         STR   The address of the network in form of edge list.                   No default value.
---timeout         INT   The maximum time in which LSWL can retreive the community.         Default is 2.
---output          STR   The address of the file to store the results.                      Default is './community.dat'.
+--strength_type   '1': strengths between [-1,+1] and '2': strengths between [0,1].   Default is '2'.
+--network         The address of the network in form of edge list.                   No default value.
+--timeout         The maximum time in which LSWL can retreive the community.         Default is 2.
+--output          The address of the file to store the results.                      Default is './community.dat'.
 
 for [lswl_offline.py] and [lswl_online.py]:
---query_nodes     STR   The address of the list of query nodes.                            No default value.
+--query_nodes     The address of the list of query nodes.                            No default value.
 
 for [lswl_plus.py]:
---outlier         STR   If outliers need to merge into communities (y/n).                  Default is 'y'.
---overlap         STR   If overlapping communities need to be detected (y/n).              Default is 'n'.
+--outlier         If outliers need to merge into communities (y/n).                  Default is 'y'.
+--overlap         If overlapping communities need to be detected (y/n).              Default is 'n'.
 ```
 
 #### Examples
