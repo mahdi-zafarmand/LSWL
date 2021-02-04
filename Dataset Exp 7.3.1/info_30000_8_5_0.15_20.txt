@@ -1,0 +1,8 @@
+Number of nodes: 30000
+Number of edges: 404888
+Average degree: 26.993
+Modularity: 0.757
+Max Length of A Community: 77
+Min Length of A Community: 20
+Average Length of Communities: 26.362
+SD of Lengths of Communities: 8.224
