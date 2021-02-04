@@ -44,10 +44,8 @@ def read_query_nodes(path):
 
 def create_argument_parser_main():
 	parser = argparse.ArgumentParser()
-	parser.add_argument("-s", "--strength_type", help="1 for weights in [-1,+1] and 2 for weights in [0,1], default is 2.")
 	parser.add_argument("-n", "--network", help="network file address")
 	parser.add_argument("-q", "--query_nodes", help="query nodes file address")
-	parser.add_argument("-t", "--timeout", help="maximum time for LSWL to recover the community in seconds, default is 2 seconds.")
 	parser.add_argument("-o", "--output", help="path of the output file, default is './community.dat'.")
 	return parser.parse_args()
 
@@ -210,7 +208,6 @@ if __name__ == "__main__":
 	args = create_argument_parser_main()
 	graph = load_graph(args.network)
 	query_nodes = read_query_nodes(args.query_nodes)
-	timeout = float(args.timeout) if args.timeout != None and args.timeout.isnumeric() == True else 2.0
 	output = args.output if args.output != None else 'community.dat'
 
 	community_searcher = ModularityMCommunityDiscovery(graph)
