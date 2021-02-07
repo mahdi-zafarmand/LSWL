@@ -46,7 +46,7 @@ def create_argument_parser_main():
 	parser.add_argument("-s", "--strength_type", help="1 for weights in [-1,+1] and 2 for weights in [0,1], default is 2.")
 	parser.add_argument("-n", "--network", help="network file address")
 	parser.add_argument("-q", "--query_nodes", help="query nodes file address")
-	parser.add_argument("-t", "--timeout", help="maximum time for LSWL to recover the community in seconds, default is 0.1 seconds.")
+	parser.add_argument("-t", "--timeout", help="maximum time for LSWL to recover the community in seconds, default is 1 second.")
 	parser.add_argument("-o", "--output", help="path of the output file, default is './community.dat'.")
 	return parser.parse_args()
 
@@ -214,7 +214,7 @@ if __name__ == "__main__":
 	graph = load_graph(args.network)
 	query_nodes = read_query_nodes(args.query_nodes)
 	strength_type = 1 if args.strength_type == '1' else 2
-	timeout = float(args.timeout) if args.timeout != None and args.timeout.isnumeric() == True else 0.1
+	timeout = float(args.timeout) if args.timeout != None and args.timeout.isnumeric() == True else 1.0
 	output = args.output if args.output != None else 'community.dat'
 
 	community_searcher = LSWLCommunityDiscovery(graph, strength_type, timeout)
