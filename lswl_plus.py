@@ -36,7 +36,6 @@ def create_argument_parser_main():
 	parser.add_argument("-n", "--network", help="network file address")
 	parser.add_argument("-i", "--outlier", help="y/n, if outliers need to merge into communities, default is 'y'.")
 	parser.add_argument("-c", "--overlap", help="y/n, if overlapping communities need to be detected, default is 'n'.")
-	parser.add_argument("-t", "--timeout", help="maximum time for LSWL to recover the community in seconds, default is 2 seconds.")
 	parser.add_argument("-o", "--output", help="path of the output file, default is './community.dat'.")
 	return parser.parse_args()
 
