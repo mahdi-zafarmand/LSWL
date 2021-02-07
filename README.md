@@ -1,12 +1,12 @@
 # LSWL
-A NetworkX implementation of "Local Community Discovery in Complex Networks: Relying on the Strength of Links" (submitted for KDD 2021).
+A NetworkX implementation of "Fast Local Community Discovery: Relying on the Strength of Links" (submitted for KDD 2021).
 
 ### Abstract
 Community detection methods aim to find nodes connected to each other more than the other nodes in a graph. Despite the advantages of global methods, as they explore the entire network, they suffer from severe limitations due to large networks' sizes or a global criterion used indiscriminately throughout the whole network. Thus, some have focused on another fundamental problem, local community discovery, an egocentric function aiming to find the community that contains a query node. There are various local community search algorithms, including motif-based methods and modularity-based methods. Despite the advantages of the local modularity based practices, they recently obtained less attention due to two significant issues. These methods add many outliers to the community, especially when using on large dense networks. They are also sensitive to which query node of a particular community is used to start the expansion. We introduce a novel approach that can locally discover the communities precisely, deterministically, and quickly. It can also be used iteratively to detect the entire partitioning of a network with or without considering overlapping communities and concurrently identify outliers. This method works in a one-node-expansion model based on a notion of strong and weak links in a graph.
 
 
 This repository provides Networkx implementation for LSWL and LSWL+ described in
-> Local Community Discovery in Complex Networks: Relying on the Strength of Links, submitted for KDD 2021.
+> Fast Local Community Discovery: Relying on the Strength of Links, submitted for KDD 2021.
 
 The original codes are lswl_offline.py, which finds the communities of nodes in a given network, lswl_online.py, which does the same thing when the intended network is too large extensive memory consumption needs to be avoided. The last is lswl_plus.py, which uses our novel local discovery framework to detect the entire community structure of a given network by iteratively applying the LSWL approach to the unexplored parts of the network. The LSWL+ is capable of finding a partition with overlapping communities or without them, based on user preferences. This method can also find outliers (peripheral nodes of the graph that are marginally connected to communities) and hubs (nodes that bridge the communities). Modularity R and Modularity M are two methods initially presented in the following references, which we implemented for evaluation purposes.
 
