@@ -45,7 +45,7 @@ This repository also contains the synthetic networks we generated via the *LFR b
 ```
 --strength_type   '1': strengths between [-1,+1] and '2': strengths between [0,1].   Default is '2'.
 --network         The address of the network in form of edge list.                   No default value.
---timeout         The maximum time in which LSWL can retreive the community.         Default is 2.
+--timeout         The maximum time in which LSWL can retreive the community.         Default is 0.1 second.
 --output          The address of the file to store the results.                      Default is './community.dat'.
 
 for [lswl_offline.py] and [lswl_online.py]:
