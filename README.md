@@ -45,7 +45,7 @@ This repository also contains the synthetic networks we generated via the *LFR b
 ```
 --strength_type   '1': strengths between [-1,+1] and '2': strengths between [0,1].   Default is '2'.
 --network         The address of the network in form of edge list.                   No default value.
---timeout         The maximum time in which LSWL should retrieve the community.         Default is 0.1 second.
+--timeout         The maximum time in which LSWL should retrieve the community.      Default is 1 second.
 --output          The address of the file to store the results.                      Default is './community.dat'.
 
 for [lswl_offline.py] and [lswl_online.py]:
@@ -60,11 +60,11 @@ for [lswl_plus.py]:
 
 The following commands are examples demonstrating how each code in this repository can be executed:
 ```
-$ python lswl_offline.py -n karate_edge_list.txt -q query_nodes.txt -s 1
-$ python lswl_online.py -n karate_edge_list.txt -q query_nodes.txt -s 2
+$ python lswl_offline.py -n karate_edge_list.txt -q karate_query_nodes.txt -s 1
+$ python lswl_online.py -n karate_edge_list.txt -q karate_query_nodes.txt -s 2
 $ python lswl_plus.py -n karate_edge_list.txt -i y
-$ python mod_r.py -n karate_edge_list.txt -q query_nodes.txt
-$ python mod_m.py -n karate_edge_list.txt -q query_nodes.txt
+$ python mod_r.py -n karate_edge_list.txt -q karate_query_nodes.txt
+$ python mod_m.py -n karate_edge_list.txt -q karate_query_nodes.txt
 ```
 
 Feel free to have a look at different parameters of each code via:
