@@ -37,14 +37,13 @@ def create_argument_parser_main():
 	parser.add_argument("-s", "--strength_type", help="1 for weights in [-1,+1] and 2 for weights in [0,1], default is 2.")
 	parser.add_argument("-n", "--network", help="network file address")
 	parser.add_argument("-q", "--query_nodes", help="query nodes file address")
-	parser.add_argument("-t", "--timeout", help="maximum time for LSWL to recover the community in seconds, default is 5 seconds.")
 	parser.add_argument("-o", "--output", help="path of the output file, default is './community.dat'.")
 	return parser.parse_args()
 
 
 class OnlineCommunitySearch:
 	minimum_improvement = 0.000001
-	def __init__(self, adj_list_address, strength_type, timeout):
+	def __init__(self, adj_list_address, strength_type):
 		self.graph = nx.Graph()
 		self.adj_list_address = adj_list_address
 		self.strength_type = strength_type
@@ -54,7 +53,6 @@ class OnlineCommunitySearch:
 		self.strength_assigned_nodes = set()
 		self.dict_common_neighbors = {}
 		self.max_common_neighbors = {}
-		self.timer_timeout = timeout
 
 	def add_edges_before_strength_assignment(self):
 		d = {}
@@ -210,7 +208,7 @@ class OnlineCommunitySearch:
 		if len(self.community) < 3:
 			if len(self.shell) > 0:
 				start_node_for_amend = max(self.shell, key=self.real_degree)
-				next_community_searcher = OnlineCommunitySearch(self.adj_list_address, self.strength_type, self.timer_timeout)
+				next_community_searcher = OnlineCommunitySearch(self.adj_list_address, self.strength_type)
 				new_members = next_community_searcher.discover_community(start_node_for_amend, amend=False)
 				for new_member in new_members:
 					if (new_member in self.community) is False:
@@ -224,12 +222,11 @@ if __name__ == '__main__':
 	query_nodes = read_query_nodes(args.query_nodes)
 	temp_adjlist_file = make_adjlist_from_edgelist(args.network)
 	strength_type = 1 if args.strength_type == '1' else 2
-	timeout = float(args.timeout) if args.timeout != None and args.timeout.isnumeric() == True else 5.0
 	output = args.output if args.output != None else 'community.dat'
 	
 	with open(output, 'w') as file:
 		for e, node_number in enumerate(query_nodes):
-			community_searcher = OnlineCommunitySearch(temp_adjlist_file, strength_type, timeout)
+			community_searcher = OnlineCommunitySearch(temp_adjlist_file, strength_type)
 			community = community_searcher.discover_community(node_number)
 			print(str(e + 1) + ' : ' + str(node_number) + ' > (' + str(len(community)) + ' nodes)')
 			file.write(str(node_number) + ' : ' + str(community) + ' (' + str(len(community)) + ')\n')
