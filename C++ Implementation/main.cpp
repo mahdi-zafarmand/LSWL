@@ -43,16 +43,16 @@ std::string vector_to_string(std::vector<T> the_vector) {
 }
 
 int main() {
-    Graph* graph = load_graph("sc-delaunay_n23.edges");
-    std::vector<int> query_nodes = read_query_nodes("query_nodes_youtube.txt");
+    Graph* graph = load_graph("karate.txt");
+    std::vector<int> query_nodes = read_query_nodes("query_nodes_karate.txt");
 
     graph->print_info();
     std::cout << "There are " << query_nodes.size() << " query nodes in this file." << std::endl;
 
     SIWO community_search = SIWO(graph, false, 10.0);
 
-    std::vector<int> discovered_community;
     auto start_time = std::chrono::high_resolution_clock::now();
+    std::vector<int> discovered_community;
     std::ofstream outfile;
     outfile.open("output.txt");
     

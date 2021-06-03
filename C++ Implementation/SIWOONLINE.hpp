@@ -1,5 +1,5 @@
-#ifndef CLASS_SIWO
-#define CLASS_SIWO
+#ifndef CLASS_SIWO_ONLINE_
+#define CLASS_SIWO_ONLINE_
 
 
 #include "Graph.hpp"
@@ -9,10 +9,15 @@
 
 
 #define __SIWO_MIN_IMPROV 0.000001
+#define __DELIMITER ' '
+// #define __DELIMITER '\t'
+#define __START_FROM_ONE true
 
-class SIWO {
+
+class SiwoOnline {
     private:
         Graph* graph;
+        std::string adjlist_filename;
         bool strength_type;
         int starting_node;
         std::vector<int>* community;
@@ -22,6 +27,10 @@ class SIWO {
         std::unordered_set<int>* strength_assigned_nodes;
         float timeout;
 
+        void initialize(int node_id);
+        std::vector<int> read_neighbors_from_file(int node_id);
+        void add_new_edges(int node_id, std::vector<int> const &neighbor_ids);
+        void add_edges_before_strength_assignment();
         void update_sets_when_node_joins(Node* new_node);
         void update_shell_when_node_joins(Node* new_node);
         void update_dicts_of_common_neighbors_info(Node* node);
@@ -32,8 +41,8 @@ class SIWO {
         void amend_small_communities();
 
     public:
-        SIWO(Graph* _graph, bool _strength_type, float _timeout);
-        ~SIWO();
+        SiwoOnline(std::string _adjlist_filename, bool _strength_type, float _timeout);
+        ~SiwoOnline();
         
         void reset();
         void remove_self_loops();
