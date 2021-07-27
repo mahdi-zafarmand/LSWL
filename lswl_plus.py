@@ -235,8 +235,10 @@ class LSWLPlusCommunityDetection():
 							if self.graph_copy.has_edge(node_in_com, neighbor):
 								strength_dict[i] = strength_dict.get(i, 0.0) + self.graph_copy[node_in_com][neighbor].get('weight', 0.0)
 						break
-			self.amend_partition_helper2(community, strength_dict)
-
+			if len(strength_dict) > 0:
+				self.amend_partition_helper2(community, strength_dict)
+			else:
+				self.partition.append(community)
 
 if __name__ == "__main__":
 	start_time = time.time()
