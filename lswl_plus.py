@@ -158,6 +158,38 @@ class LSWLPlusCommunityDetection():
 		dangling_neighbors = [node for node in neighborhood if self.graph.degree[node] == 1]
 		self.community = list(set(self.community + dangling_neighbors))
 
+	def add_edge_weights(self, new_node, edge_weights):
+		for edge in graph.edges(new_node):
+			if edge[1] in self.community:
+				edge_weights.append((new_node, edge[1], self.graph[new_node][edge[1]].get('strength', 0.0)))
+
+
+	def remove_nodes(self, main_node, edge_weights):
+		if edge_weights == []:
+			return
+
+		edge_weights.sort(key=lambda x:x[2])
+		median, L = 0.0, len(edge_weights)
+
+		if L % 2 == 0:
+			median = (edge_weights[L // 2 - 1][2] + edge_weights[L // 2][2]) * 0.5
+		else:
+			median = edge_weights[L // 2][2]
+
+		remaining_nodes, length = set([main_node]), 1
+		while True:
+			for n1, n2, w in edge_weights:
+				if w >= median and n1 in remaining_nodes:
+					remaining_nodes.add(n1)
+				elif w >= median and n2 in remaining_nodes:
+					remaining_nodes.add(n1)
+			if len(remaining_nodes) == length:
+				break
+			length = len(remaining_nodes)
+
+		self.community = list(remaining_nodes)
+
+
 	def find_community(self, start_node=None):
 		if start_node == None:
 			remaining_nodes = set(self.graph.nodes() - self.proccessed_nodes)
@@ -165,7 +197,7 @@ class LSWLPlusCommunityDetection():
 		self.set_start_node(start_node)
 		self.assign_local_strength(self.starting_node)
 
-		improvements = {}
+		improvements, edge_weights = {}, list()
 		while len(self.community) < self.graph.number_of_nodes() and len(self.shell) > 0:
 			for node in self.shell:
 				self.assign_local_strength(node)
@@ -180,7 +212,11 @@ class LSWLPlusCommunityDetection():
 				elif len(self.community) < 3 and improvement <  LSWLPlusCommunityDetection.minimum_improvement:
 					break
 
+			self.add_edge_weights(new_node, edge_weights)
 			self.update_sets_when_node_joins(new_node)
+
+		self.remove_nodes(start_node, edge_weights)
+
 		if self.merge_outliers == True:
 			self.merge_dangling_nodes()
 
@@ -251,11 +287,12 @@ if __name__ == "__main__":
 	detect_overlap = True if args.overlap == 'y' else False
 	output = args.output if args.output != None else 'community.dat'
 
-	community_detector = LSWLPlusCommunityDetection(deepcopy(graph), strength_type, merge_outliers, detect_overlap)
-	partition = community_detector.community_detection()
+	for i in range(1, 11):
+		community_detector = LSWLPlusCommunityDetection(deepcopy(graph), strength_type, merge_outliers, detect_overlap)
+		partition = community_detector.community_detection()
+		with open(str(i) + '.txt', 'w') as file:
+			for e, com in enumerate(partition):
+				file.write(str(com) + ' (' + str(len(com)) + ')\n')
+				# print((e+1), ': (' + str(len(com)) + ') >', com)
 
-	with open(output, 'w') as file:
-		for e, com in enumerate(partition):
-			file.write(str(com) + ' (' + str(len(com)) + ')\n')
-		
-	print('elapsed time =', time.time() - start_time)
+		print('elapsed time =', time.time() - start_time)
