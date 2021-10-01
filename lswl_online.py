@@ -2,6 +2,8 @@ import networkx as nx
 import os.path
 import time
 import argparse
+import linecache
+import numpy as np
 
 
 def read_query_nodes(path):
@@ -17,33 +19,19 @@ def read_query_nodes(path):
 	return query_nodes
 
 
-def make_adjlist_from_edgelist(edgelist_file):
-	if not os.path.isfile(edgelist_file):
-		print("Error: file " + edgelist_file + " not found!")
-		exit(-1)
-	graph = nx.read_edgelist(edgelist_file)
-	with open('temp_adjlist_file.txt', 'w') as file:
-		nodes = list(graph.nodes())
-		nodes = list(map(int, nodes))
-		for node in sorted(nodes):
-			neighbors = list(graph.neighbors(str(node)))
-			line = str(node) + ' ' + ' '.join(neighbors) + '\n'
-			file.write(line)
-	return 'temp_adjlist_file.txt'
-
-
 def create_argument_parser_main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("-s", "--strength_type", help="1 for weights in [-1,+1] and 2 for weights in [0,1], default is 2.")
 	parser.add_argument("-n", "--network", help="network file address")
 	parser.add_argument("-q", "--query_nodes", help="query nodes file address")
+	parser.add_argument("-t", "--timeout", help="maximum time for LSWL to recover the community in seconds, default is 1 second.")
 	parser.add_argument("-o", "--output", help="path of the output file, default is './community.dat'.")
 	return parser.parse_args()
 
 
 class OnlineCommunitySearch:
 	minimum_improvement = 0.000001
-	def __init__(self, adj_list_address, strength_type):
+	def __init__(self, adj_list_address, strength_type, timeout):
 		self.graph = nx.Graph()
 		self.adj_list_address = adj_list_address
 		self.strength_type = strength_type
@@ -53,6 +41,7 @@ class OnlineCommunitySearch:
 		self.strength_assigned_nodes = set()
 		self.dict_common_neighbors = {}
 		self.max_common_neighbors = {}
+		self.timer_timeout = timeout
 
 	def add_edges_before_strength_assignment(self):
 		d = {}
@@ -63,13 +52,44 @@ class OnlineCommunitySearch:
 				if (neigh in d) is False:
 					d[neigh] = self.read_neighbors(neigh)
 
-			for key, value in d.items():
-				self.add_new_edges(key, value)
+		for key, value in d.items():
+			self.add_new_edges(key, value)
 
-	def discover_community(self, start_node, amend=True):
+	def add_edge_weights(self, new_node, edge_weights):
+		for edge in self.graph.edges(new_node):
+			if edge[1] in self.community:
+				edge_weights.append((new_node, edge[1], self.graph[new_node][edge[1]].get('strength', 0.0)))
+
+	def remove_nodes(self, main_node, edge_weights):
+		if edge_weights == []:
+			return
+
+		edge_weights.sort(key=lambda x:x[2])
+		quartile = np.quantile(edge_weights, 0.25)
+
+		remaining_nodes, length = set([main_node]), 1
+		while True:
+			for n1, n2, w in edge_weights:
+				if w >= quartile and n1 in remaining_nodes:
+					remaining_nodes.add(n1)
+				elif w >= quartile and n2 in remaining_nodes:
+					remaining_nodes.add(n1)
+			if len(remaining_nodes) == length:
+				break
+			length = len(remaining_nodes)
+
+		self.community = list(remaining_nodes)
+
+	def community_search(self, start_node, amend=True):
+		start_timer = time.time()
 		self.initilize(start_node)
-		improvements = {}
+
+		improvements, edge_weights = {}, list()
 		while len(self.community) < self.graph.number_of_nodes() and len(self.shell) > 0:
+			if time.time() > start_timer + self.timer_timeout:
+				print('Timeout!')
+				break
+
 			self.add_edges_before_strength_assignment()
 			for node in self.shell:
 				self.assign_local_strength(node)
@@ -84,7 +104,10 @@ class OnlineCommunitySearch:
 				elif len(self.community) < 3 and improvement <  OnlineCommunitySearch.minimum_improvement:
 					break
 
+			self.add_edge_weights(new_node, edge_weights)
 			self.update_sets_when_node_joins(new_node)
+
+		self.remove_nodes(start_node, edge_weights)
 
 		if amend:
 			self.amend_small_communities()
@@ -94,13 +117,11 @@ class OnlineCommunitySearch:
   
 	def read_neighbors(self, node):
 		neighbors = []
-		with open(self.adj_list_address, 'r') as file:
-			for line in file:
-				striped_line = line.split()
-				if int(striped_line[0]) == node:
-					for x in striped_line[1:]:
-						neighbors.append(int(x))
-					break
+		line = linecache.getline(self.adj_list_address, node)
+		striped_line = line.split()
+		if len(striped_line) > 0 and int(striped_line[0]) == node:
+			for x in striped_line[1:]:
+				neighbors.append(int(x))
 		return neighbors
 
 	def real_degree(self, node):
@@ -208,8 +229,8 @@ class OnlineCommunitySearch:
 		if len(self.community) < 3:
 			if len(self.shell) > 0:
 				start_node_for_amend = max(self.shell, key=self.real_degree)
-				next_community_searcher = OnlineCommunitySearch(self.adj_list_address, self.strength_type)
-				new_members = next_community_searcher.discover_community(start_node_for_amend, amend=False)
+				next_community_searcher = OnlineCommunitySearch(self.adj_list_address, self.strength_type, self.timer_timeout)
+				new_members = next_community_searcher.community_search(start_node_for_amend, amend=False)
 				for new_member in new_members:
 					if (new_member in self.community) is False:
 						self.community.append(new_member)
@@ -220,16 +241,15 @@ if __name__ == '__main__':
 
 	args = create_argument_parser_main()
 	query_nodes = read_query_nodes(args.query_nodes)
-	temp_adjlist_file = make_adjlist_from_edgelist(args.network)
 	strength_type = 1 if args.strength_type == '1' else 2
+	timeout = float(args.timeout) if args.timeout != None and args.timeout.isnumeric() == True else 1.0
 	output = args.output if args.output != None else 'community.dat'
 	
 	with open(output, 'w') as file:
 		for e, node_number in enumerate(query_nodes):
-			community_searcher = OnlineCommunitySearch(temp_adjlist_file, strength_type)
-			community = community_searcher.discover_community(node_number)
+			community_searcher = OnlineCommunitySearch(args.network, strength_type, timeout)
+			community = community_searcher.community_search(node_number)
 			print(str(e + 1) + ' : ' + str(node_number) + ' > (' + str(len(community)) + ' nodes)')
 			file.write(str(node_number) + ' : ' + str(community) + ' (' + str(len(community)) + ')\n')
 			del community_searcher
-	os.remove(temp_adjlist_file)
 	print('elapsed time =', time.time() - start_time)

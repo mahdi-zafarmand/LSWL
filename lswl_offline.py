@@ -2,6 +2,7 @@ import networkx as nx
 import os.path
 import time
 import argparse
+import numpy as np
 
 
 def load_graph(path, weighted=False, delimiter='\t', self_loop=False):
@@ -165,17 +166,16 @@ class LSWLCommunityDiscovery():
 		self.community = list(set(self.community + dangling_neighbors))
 
 	def amend_small_communities(self):
-		if len(self.community) < 3:
-			if len(self.shell) > 0:
-				start_node_for_amend = max(self.shell, key=self.graph.degree)
-				next_community_searcher = LSWLCommunityDiscovery(self.graph, self.strength_type, self.timer_timeout)
-				new_members = next_community_searcher.community_search(start_node_for_amend, amend=False)
-				for new_member in new_members:
-					if (new_member in self.community) is False:
-						self.community.append(new_member)
+		if len(self.community) < 3 and len(self.shell) > 0:
+			start_node_for_amend = max(self.shell, key=self.graph.degree)
+			next_community_searcher = LSWLCommunityDiscovery(self.graph, self.strength_type, self.timer_timeout)
+			new_members = next_community_searcher.community_search(start_node_for_amend, amend=False)
+			for new_member in new_members:
+				if (new_member in self.community) is False:
+					self.community.append(new_member)
 
 	def add_edge_weights(self, new_node, edge_weights):
-		for edge in graph.edges(new_node):
+		for edge in self.graph.edges(new_node):
 			if edge[1] in self.community:
 				edge_weights.append((new_node, edge[1], self.graph[new_node][edge[1]].get('strength', 0.0)))
 
@@ -185,19 +185,14 @@ class LSWLCommunityDiscovery():
 			return
 
 		edge_weights.sort(key=lambda x:x[2])
-		median, L = 0.0, len(edge_weights)
-
-		if L % 2 == 0:
-			median = (edge_weights[L // 2 - 1][2] + edge_weights[L // 2][2]) * 0.5
-		else:
-			median = edge_weights[L // 2][2]
+		quartile = np.quantile(edge_weights, 0.25)
 
 		remaining_nodes, length = set([main_node]), 1
 		while True:
 			for n1, n2, w in edge_weights:
-				if w >= median and n1 in remaining_nodes:
+				if w >= quartile and n1 in remaining_nodes:
 					remaining_nodes.add(n1)
-				elif w >= median and n2 in remaining_nodes:
+				elif w >= quartile and n2 in remaining_nodes:
 					remaining_nodes.add(n1)
 			if len(remaining_nodes) == length:
 				break
@@ -210,7 +205,7 @@ class LSWLCommunityDiscovery():
 		self.set_start_node(start_node)
 		self.assign_local_strength(self.starting_node)
 
-		improvements = {}
+		improvements, edge_weights = {}, list()
 		while len(self.community) < self.graph.number_of_nodes() and len(self.shell) > 0:
 			if time.time() > start_timer + self.timer_timeout:
 				print('Timeout!')
