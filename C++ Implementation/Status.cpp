@@ -42,13 +42,13 @@ void Status::init(const Graph &graph) {
     float deg, looptmp;
     std::unordered_map<int, Node*>* nodes = graph.get_nodes();
     for(auto node : *nodes) {
-        node2com->insert({node.first, count});
+        node2com->insert(std::make_pair(node.first, count));
         deg = graph.degree(node.second);
-        degrees->insert({count, deg});
-        gdegrees->insert({node.first, deg});
+        degrees->insert(std::make_pair(count, deg));
+        gdegrees->insert(std::make_pair(node.first, deg));
         looptmp = graph.get_edge_weight(node.second, node.second);
-        loops->insert({node.first, looptmp});
-        internals->insert({count, loops->at(node.first)});
+        loops->insert(std::make_pair(node.first, looptmp));
+        internals->insert(std::make_pair(count, loops->at(node.first)));
         count++;
     }
 }
@@ -62,10 +62,10 @@ void Status::init(const Graph &graph, std::unordered_map<int, int>& partition) {
     std::unordered_map<int, Node*>* nodes = graph.get_nodes();
     for(auto node : *nodes) {
         int com = partition[node.first];
-        node2com->insert({node.first, com});
+        node2com->insert(std::make_pair(node.first, com));
         deg = graph.degree(node.second);
-        degrees->insert({count, deg + degrees->at(com)});
-        gdegrees->insert({node.first, deg});
+        degrees->insert(std::make_pair(count, deg + degrees->at(com)));
+        gdegrees->insert(std::make_pair(node.first, deg));
         inc = 0.0;
         neighbors = node.second->neighbors();
         for(auto neighbor : *neighbors) {
@@ -75,6 +75,6 @@ void Status::init(const Graph &graph, std::unordered_map<int, int>& partition) {
                 inc += neighbor.second / 2.0;
             }
         }
-        internals->insert({com, internals->at(com) + inc});
+        internals->insert(std::make_pair(com, internals->at(com) + inc));
     }
 }

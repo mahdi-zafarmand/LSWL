@@ -38,7 +38,7 @@ void Node::add_connection(Node *node, float value){
         this->connections->at(node) = value;
         return;
     }
-    this->connections->insert({node, value});
+    this->connections->insert(std::make_pair(node, value));
 }
 
 void Node::add_connection(Node *node){
@@ -46,7 +46,7 @@ void Node::add_connection(Node *node){
         this->connections->at(node) = 1.0;
         return;
     }
-    this->connections->insert({node, 1.0});
+    this->connections->insert(std::make_pair(node, 1.0));
 }
 
 void Node::assign_strength(Node* neighbor, float strength_value) {
@@ -54,7 +54,7 @@ void Node::assign_strength(Node* neighbor, float strength_value) {
         this->strengths->at(neighbor) = strength_value;
         return;
     }
-    this->strengths->insert({neighbor, strength_value});
+    this->strengths->insert(std::make_pair(neighbor, strength_value));
 }
 
 float Node::get_strength(Node* neighbor) {

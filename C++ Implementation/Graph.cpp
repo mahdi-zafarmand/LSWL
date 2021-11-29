@@ -26,7 +26,7 @@ Node* Graph::add_node(Node* node) {
 Node* Graph::add_node(int node_id) {
     auto new_node_it = this->nodes->find(node_id);
     if(new_node_it == this->nodes->end()){
-        this->nodes->insert({node_id, new Node(node_id)});
+        this->nodes->insert(std::make_pair(node_id, new Node(node_id)));
         return this->nodes->at(node_id);
     }
     return new_node_it->second;

@@ -1,6 +1,6 @@
 # CC = g++
 CC = clang++
-CFLAGS =	-g	-Wall	-O3
+CFLAGS =	-g	-std=c++11	-Wall	-O3
 TARGET = sna
 
 all : $(TARGET)

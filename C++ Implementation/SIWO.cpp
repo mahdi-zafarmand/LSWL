@@ -60,8 +60,8 @@ void SIWO::update_shell_when_node_joins(Node* new_node) {
 void SIWO::update_dicts_of_common_neighbors_info(Node* node) {
     int node_id = node->get_id();
     if(this->common_neighbors->find(node_id) == this->common_neighbors->end()) {
-        this->common_neighbors->insert({node_id, new std::unordered_map<int, int>});
-        this->max_common_neighbors->insert({node_id, -1});
+        this->common_neighbors->insert(std::make_pair(node_id, new std::unordered_map<int, int>));
+        this->max_common_neighbors->insert(std::make_pair(node_id, -1));
     }
 
     int number_common_neighbors;
@@ -70,13 +70,13 @@ void SIWO::update_dicts_of_common_neighbors_info(Node* node) {
         std::unordered_map<int, int> temp_neighbors = *(this->common_neighbors->at(node_id));
         if(temp_neighbors.find(neighbor_id) == temp_neighbors.end()) {
             if(this->common_neighbors->find(neighbor_id) == this->common_neighbors->end()) {
-                this->common_neighbors->insert({neighbor_id, new std::unordered_map<int, int>});
-                this->max_common_neighbors->insert({neighbor_id, -1});
+                this->common_neighbors->insert(std::make_pair(neighbor_id, new std::unordered_map<int, int>));
+                this->max_common_neighbors->insert(std::make_pair(neighbor_id, -1));
             }
 
             number_common_neighbors = this->graph->get_common_neighbors(node, this->graph->get_node(neighbor_id));
-            this->common_neighbors->at(node_id)->insert({neighbor_id, number_common_neighbors});
-            this->common_neighbors->at(neighbor_id)->insert({node_id, number_common_neighbors});
+            this->common_neighbors->at(node_id)->insert(std::make_pair(neighbor_id, number_common_neighbors));
+            this->common_neighbors->at(neighbor_id)->insert(std::make_pair(node_id, number_common_neighbors));
 
             if(number_common_neighbors > this->max_common_neighbors->at(node_id)) {
                 this->max_common_neighbors->at(node_id) = number_common_neighbors;
@@ -119,7 +119,7 @@ int SIWO::find_best_next_node(std::unordered_map<int, float>* improvements) {
     Node* new_node = this->graph->get_node(new_node_id);
     for(int node_id : *(this->shell)) {
         if(improvements->find(node_id) == improvements->end()) {
-            improvements->insert({node_id, this->graph->get_node(node_id)->get_strength(new_node)});
+            improvements->insert(std::make_pair(node_id, this->graph->get_node(node_id)->get_strength(new_node)));
         } else if (this->graph->has_edge(node_id, new_node_id)) {
             improvements->at(node_id) = improvements->at(node_id) + this->graph->get_node(node_id)->get_strength(new_node);
         }
